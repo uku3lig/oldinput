@@ -1,0 +1,18 @@
+[
+  {
+    "modid": "oldinput",
+    "name": "OldInput",
+    "description": "raw input backport",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "",
+    "updateUrl": "",
+    "authorList": [
+      "uku"
+    ],
+    "credits": "",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
+]
