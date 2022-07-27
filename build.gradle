@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'net.uku3lig'
-version = '1.0.0'
+version = '1.0.0+1.12.2'
 
 java {
     archivesBaseName = 'oldinput'
