@@ -9,7 +9,10 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 
 import java.lang.reflect.Constructor;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -26,7 +29,7 @@ public class OldInput extends MouseHelper {
     private final AtomicDouble dx = new AtomicDouble();
     private final AtomicDouble dy = new AtomicDouble();
 
-    private final Set<Mouse> mice = new HashSet<>();
+    private static final Set<Mouse> mice = new HashSet<>();
 
     @Override
     public void mouseXYChange() {
@@ -36,23 +39,25 @@ public class OldInput extends MouseHelper {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        mice.addAll(getMice(ControllerEnvironment.getDefaultEnvironment()));
         Minecraft.getMinecraft().mouseHelper = this;
 
-        executor.scheduleAtFixedRate(() -> {
-            if (Minecraft.getMinecraft().currentScreen != null) return;
-            mice.forEach(mouse -> {
-                mouse.poll();
-                dx.addAndGet(mouse.getX().getPollData());
-                dy.addAndGet(mouse.getY().getPollData());
-            });
-        }, 0, 1, TimeUnit.MILLISECONDS);
+        mice.addAll(this.getMice(ControllerEnvironment.getDefaultEnvironment()));
 
-        executor.scheduleAtFixedRate(() -> getNewEnv().ifPresent(e -> {
-            Set<Mouse> newMice = getMice(e);
-            mice.clear();
-            mice.addAll(newMice);
-        }), 0, 5, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(() -> {
+            if (Minecraft.getMinecraft().currentScreen != null) {
+                this.getNewEnv().ifPresent(env -> {
+                    Set<Mouse> newMice = this.getMice(env);
+                    mice.clear();
+                    mice.addAll(newMice);
+                });
+            } else {
+                mice.forEach(mouse -> {
+                    mouse.poll();
+                    dx.addAndGet(mouse.getX().getPollData());
+                    dy.addAndGet(mouse.getY().getPollData());
+                });
+            }
+        }, 0, 1, TimeUnit.MILLISECONDS);
     }
 
     private Set<Mouse> getMice(ControllerEnvironment env) {
