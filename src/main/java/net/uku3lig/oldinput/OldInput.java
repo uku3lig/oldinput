@@ -9,7 +9,10 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 
 import java.lang.reflect.Constructor;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -19,14 +22,14 @@ import java.util.stream.Collectors;
 public class OldInput extends MouseHelper {
     public static final String MOD_ID = "oldinput";
     public static final String MOD_NAME = "OldInput";
-    public static final String VERSION = "1.1.1";
+    public static final String VERSION = "1.1.2-SNAPSHOT";
 
     private static final ScheduledExecutorService executor = Executors.newScheduledThreadPool(8);
 
     private final AtomicDouble dx = new AtomicDouble();
     private final AtomicDouble dy = new AtomicDouble();
 
-    private final Set<Mouse> mice = new HashSet<>();
+    private static final Set<Mouse> mice = new HashSet<>();
 
     @Override
     public void mouseXYChange() {
@@ -36,8 +39,9 @@ public class OldInput extends MouseHelper {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        mice.addAll(getMice(ControllerEnvironment.getDefaultEnvironment()));
         Minecraft.getMinecraft().mouseHelper = this;
+
+        mice.addAll(this.getMice(ControllerEnvironment.getDefaultEnvironment()));
 
         executor.scheduleAtFixedRate(() -> {
             if (Minecraft.getMinecraft().currentScreen != null) return;
@@ -48,11 +52,16 @@ public class OldInput extends MouseHelper {
             });
         }, 0, 1, TimeUnit.MILLISECONDS);
 
-        executor.scheduleAtFixedRate(() -> getNewEnv().ifPresent(e -> {
-            Set<Mouse> newMice = getMice(e);
-            mice.clear();
-            mice.addAll(newMice);
-        }), 0, 5, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(() -> this.getNewEnv().ifPresent(env -> {
+            if (Minecraft.getMinecraft().currentScreen != null) this.rescan(env);
+        }), 0, 1, TimeUnit.SECONDS);
+    }
+
+    private void rescan(ControllerEnvironment env) {
+        Set<Mouse> newMice = this.getMice(env);
+
+        mice.clear();
+        mice.addAll(newMice);
     }
 
     private Set<Mouse> getMice(ControllerEnvironment env) {
