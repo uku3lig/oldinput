@@ -44,13 +44,7 @@ public class OldInput extends MouseHelper {
         mice.addAll(this.getMice(ControllerEnvironment.getDefaultEnvironment()));
 
         executor.scheduleAtFixedRate(() -> {
-            if (Minecraft.getMinecraft().currentScreen != null) {
-                this.getNewEnv().ifPresent(env -> {
-                    Set<Mouse> newMice = this.getMice(env);
-                    mice.clear();
-                    mice.addAll(newMice);
-                });
-            } else {
+            if (Minecraft.getMinecraft().currentScreen == null) {
                 mice.forEach(mouse -> {
                     mouse.poll();
                     dx.addAndGet(mouse.getX().getPollData());
@@ -58,6 +52,15 @@ public class OldInput extends MouseHelper {
                 });
             }
         }, 0, 1, TimeUnit.MILLISECONDS);
+
+        executor.scheduleAtFixedRate(() -> {
+            if (Minecraft.getMinecraft().currentScreen == null) return;
+            this.getNewEnv().ifPresent(env -> {
+                Set<Mouse> newMice = this.getMice(env);
+                mice.clear();
+                mice.addAll(newMice);
+            });
+        }, 0, 1, TimeUnit.SECONDS);
     }
 
     private Set<Mouse> getMice(ControllerEnvironment env) {
