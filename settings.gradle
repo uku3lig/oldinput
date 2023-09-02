@@ -1,8 +1,20 @@
 pluginManagement {
     repositories {
+        maven { url "https://maven.fabricmc.net/" }
+        maven { url "https://maven.architectury.dev/" }
+        maven { url "https://files.minecraftforge.net/maven/" }
+        maven { url "https://repo.sk1er.club/repository/maven-releases/" }
+        maven { url "https://repo.spongepowered.org/maven/" }
         gradlePluginPortal()
-        maven { url = 'https://maven.minecraftforge.net/' }
-        maven { url 'https://repo.spongepowered.org/maven' }
+    }
+    resolutionStrategy {
+        eachPlugin {
+            switch (requested.id.id) {
+                case "gg.essential.loom":
+                    useModule("gg.essential:architectury-loom:${requested.version}")
+                    break
+            }
+        }
     }
 }
 
