@@ -49,8 +49,10 @@ public class OldInput extends MouseHelper {
         if (Minecraft.getMinecraft().currentScreen == null) {
             mice.forEach(mouse -> {
                 mouse.poll();
-                dx.addAndGet(mouse.getX().getPollData());
-                dy.addAndGet(mouse.getY().getPollData());
+                final float x = mouse.getX().getPollData();
+                final float y = mouse.getY().getPollData();
+                if(Math.abs(x) > 1.0f) {dx.addAndGet(x);}
+                if(Math.abs(y) > 1.0f) {dy.addAndGet(y);}
             });
         }
     }
