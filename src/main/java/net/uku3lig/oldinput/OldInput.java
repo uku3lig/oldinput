@@ -33,6 +33,14 @@ public class OldInput extends MouseHelper {
 
     @Override
     public void mouseXYChange() {
+        if (wasScreen.get()) {
+            dx.set(0.0f);
+            dy.set(0.0f);
+            this.deltaX = 0;
+            this.deltaY = 0;
+            return;
+        }
+
         this.deltaX = (int) dx.getAndSet(0);
         this.deltaY = (int) -dy.getAndSet(0);
     }
